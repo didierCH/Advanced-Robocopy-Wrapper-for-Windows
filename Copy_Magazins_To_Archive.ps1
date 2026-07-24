@@ -49,6 +49,30 @@ do {
     }
 } while (-not (Test-Path $destinationParent))
 
+# Safety check: warn if the destination already exists and is not empty.
+# Robocopy runs with /MIR, which mirrors the source and DELETES anything in the
+# destination that does not exist in the source. Confirm before proceeding.
+if (Test-Path $destinationPath -PathType Container) {
+    $existingItems = Get-ChildItem -Path $destinationPath -Force -ErrorAction SilentlyContinue
+    if ($null -ne $existingItems -and $existingItems.Count -gt 0) {
+        Write-Host ""
+        Write-Host "WARNING: The destination path is not empty ($($existingItems.Count) item(s) found)." -ForegroundColor Red
+        Write-Host "This script uses Robocopy /MIR, which will DELETE everything in the destination" -ForegroundColor Red
+        Write-Host "that does not exist in the source." -ForegroundColor Red
+        do {
+            $confirmDelete = Read-Host "The destination path is not empty. Do you really want to proceed? Everything in the directory will be deleted. (y/n)"
+            if ($confirmDelete -notmatch '^[yn]$') {
+                Write-Host "Invalid input. Please type 'y' for yes or 'n' for no." -ForegroundColor Red
+            }
+        } while ($confirmDelete -notmatch '^[yn]$')
+
+        if ($confirmDelete -eq 'n') {
+            Write-Host "Operation cancelled by user. No changes were made." -ForegroundColor Yellow
+            exit 0
+        }
+    }
+}
+
 # Ask the user about permission changes
 do {
     $changePermissions = Read-Host "Would you like to change ownership and permissions? (y/n)"

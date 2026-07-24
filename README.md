@@ -13,6 +13,7 @@ This PowerShell script facilitates the migration of directories, including owner
 ## Key Features
 
 - **Administrator Check**: Ensures the script is run with administrator privileges.
+- **Non-Empty Destination Safeguard**: Because Robocopy runs with `/MIR` (a full mirror), anything in the destination that does not exist in the source is deleted. If the destination already exists and is not empty, the script warns the user and requires explicit confirmation before proceeding.
 - **Directory Size Calculation**: Calculates and formats the size of the source and destination directories for comparison.
 - **Ownership and Permission Management (Optional)**:
   - Changes ownership of the source directory to the current administrator.
@@ -34,6 +35,7 @@ This PowerShell script facilitates the migration of directories, including owner
 1. **Input Paths**:
    - Prompts the user for the source and destination paths.
    - Validates the existence of the paths.
+   - If the destination path already exists and is not empty, prompts the user: *"The destination path is not empty. Do you really want to proceed? Everything in the directory will be deleted."* (Yes/No). Choosing No cancels the operation before any changes are made.
 2. **Ownership and Permissions (Optional)**:
    - If enabled, modifies ownership and permissions of the source directory.
 3. **Directory Size Calculation**:
